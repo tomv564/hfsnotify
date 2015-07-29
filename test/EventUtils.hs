@@ -93,7 +93,7 @@ expectEvents poll w path pats action = do
   matchEvents pats $ sortBy (comparing eventTime) evs
 
 testDirPath :: FilePath
-testDirPath = (unsafePerformIO getCurrentDirectory) </> "testdir"
+testDirPath = normalise $ (unsafePerformIO getCurrentDirectory) </> "testdir"
 
 expectEventsHere :: (?timeInterval::Int) => Bool -> [EventPattern] -> IO () -> Assertion
 expectEventsHere poll = expectEvents poll watchDir testDirPath
