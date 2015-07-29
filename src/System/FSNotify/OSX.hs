@@ -52,16 +52,17 @@ fsnEvents timestamp fseEvent = liftM concat . sequence $ map (\f -> f fseEvent) 
   where
     eventFunctions :: UTCTime -> [FSE.Event -> IO [Event]]
     eventFunctions t = [addedFn t, modifFn t, removFn t, renamFn t]
-    addedFn t e = if hasFlag e FSE.eventFlagItemCreated        then return [Added    (path e) t] else return []
-    modifFn t e = if (hasFlag e FSE.eventFlagItemModified
-                   || hasFlag e FSE.eventFlagItemInodeMetaMod) then return [Modified (path e) t] else return []
-    removFn t e = if hasFlag e FSE.eventFlagItemRemoved        then return [Removed  (path e) t] else return []
-    renamFn t e = if hasFlag e FSE.eventFlagItemRenamed then
+    addedFn t e = if (hasFlag e FSE.eventFlagItemCreated) && (isFileEvent e) then return [Added    (path e) t] else return []
+    modifFn t e = if ((hasFlag e FSE.eventFlagItemModified
+                   || hasFlag e FSE.eventFlagItemInodeMetaMod)) && (isFileEvent e) then return [Modified (path e) t] else return []
+    removFn t e = if (hasFlag e FSE.eventFlagItemRemoved)  && (isFileEvent e)      then return [Removed  (path e) t] else return []
+    renamFn t e = if (hasFlag e FSE.eventFlagItemRenamed) && (isFileEvent e) then
                     doesFileExist (path e) >>= \exists -> if exists   then return [Added    (path e) t] else return [Removed (path e) t]
                   else
                     return []
     path = canonicalEventPath
     hasFlag event flag = FSE.eventFlags event .&. flag /= 0
+    isFileEvent event = hasFlag event FSE.eventFlagItemIsFile
 
 -- Separate logic is needed for non-recursive events in OSX because the
 -- hfsevents package doesn't support non-recursive event reporting.
