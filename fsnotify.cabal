@@ -45,7 +45,7 @@ Library
     if os(windows)
       CPP-Options:      -DOS_Win32
       Other-Modules:    System.FSNotify.Win32
-      Build-Depends:    Win32-notify >= 0.3, system-filepath, system-fileio
+      Build-Depends:    Win32-notify >= 0.3
     else
       if os(darwin)
         CPP-Options:    -DOS_Mac
